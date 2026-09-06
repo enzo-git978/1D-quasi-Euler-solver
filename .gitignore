@@ -1,0 +1,12 @@
+# Objets et exécutables
+*.o
+*.mod
+*.exe
+solve
+*.out
+
+# Fichiers de données/résultats
+*.dat
+*.txt
+*.png
+*.pdf

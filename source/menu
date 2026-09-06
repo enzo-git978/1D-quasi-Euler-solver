@@ -1,0 +1,91 @@
+--------------------------------------------------------------------------------
+MENU DU CODE EULER Quasi_1D POUR TUYERES
+--------------------------------------------------------------------------------
+
+--MESH--------------------------------------------------------------------------
+! Domain cells :
+!
+!              |           |   u(i)    |           |
+!              |  u(i-1)   |___________|           |
+!              |___________|           |   u(i+1)  |
+!              |           |           |___________|
+!           ...|-----x-----|-----x-----|-----x-----|...
+!              |    i-1    |     i     |    i+1    |
+!              |-         +|-         +|-         +|
+!            i-3/2       i-1/2       i+1/2       i+3/2
+
+--PARAMETRES PHYSIQUES--------------------------------------------------------------------
+! Gaz choisi 1 : Air (frais),  2 : air chaud (gamma=1.35), 3: air apres combustion tres chaud (gamma = 1.32)	 			
+3
+
+! Pt0 : Pression totale initiale
+1.0d6 
+
+! Tt0 : Temperature totale initiale
+3.0d3
+
+! Pext : Pression de sortie (pour sortie subsonique)
+8.0d5
+
+! Cf : Coefficient de frottements, exemple : Cf = 0.1d-1
+0.0d0
+
+! h : Coefficient de transfert thermique convectifs
+0.0d0
+
+! Tp : Temperature de paroi
+5.0d3
+
+--SIMULATION------------------------------------------------------------------------------
+! Nombre de points de grille N 		  INDICATION : choisir nombre impair comme ça le noeud central est en L/2	
+401
+
+! Longueur de la tuyere
+1.0d0
+
+! Condition CFL	     		 cfl	  INDICATION : keep cfl <= 0.5 pour avoid oscillations en explicite
+0.5D0	
+
+! Maxiter : Nombre d'iterations max
+50000
+
+! Tol : Precision des résidus
+1.0d-7
+
+! Configuration de la Tuyere, 1 : Divergent, 2 : Tuyere de Laval, 3 : Tuyere CV/DV, 4 : Soufflerie double col de 3m (2eme col ferme), 5 : idem col ouvert, 6 : parabolique 
+2
+
+! Implicitation 0 : Explicite, 1 : Implicite
+0	
+
+--BOUNDARY CONDITIONS------------------------------------------------------------------------------
+! Inlet BC   1 : Subsonic inlet, 2 : Supersonic inlet	
+1	
+
+! Outlet BC   1 : Subsonic outlet, 2 : Supersonic outlet	
+1
+
+--NUMERIQUE------------------------------------------------------------------------------
+! Choix du schema pour flux    1 : Roe, 2 : HLL-Davis, 3 : HLLR, 4 : HLLE (Einfeldt), 5 : HLLC-ANRS (Toro), 6 : HLLC simple
+5	
+
+! Choix ordre de precision spatial      1 : ordre 1,     2 : reconstruction MUSCL (ordre 2 ou plus)
+2
+
+! Correction entropique de Harten pour ROE (schema 1) 0 : sans correction, 1 : correction entropique, 2 : correction complete
+0
+
+! Coefficient delta_star pour correction entropique INDICATION : delta_star = 0.1 (plus il augmente plus le schema est robuste mais precision decroit)
+1.0d-1
+
+! Choix du parametre phi (POUR ORDRE DE PRECISION=2) INDICATION : -1<=phi<=1 valeurs speciales : phi = -1 ordre 2 decentre; phi=1 : ordre 2 centre, phi = 1/3 : ordre 3 mais METTRE 3 pour ordre 3 car lecture de 1/3 difficile                 
+-1.0d0
+
+! Choix du parametre de compression b (POUR ORDRE DE PRECISION=2) INDICATION : 1<=b<=(3-phi)/(1-phi)                     
+1.2d0
+	
+! Choix du limiteur (POUR ORDRE DE PRECISION=2)  1 : Minmod,         2 : VanLeer,     3 : VanAlbada, 4 : Superbee,   5 : Chakravarthy                      
+5	
+
+! (POUR LIMITER=5), veuillez préciser le coeff beta  INDICATION : 1 <= beta <= 2
+1 
