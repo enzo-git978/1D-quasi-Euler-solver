@@ -17,21 +17,21 @@ subroutine Solve_Eqn_Euler_MUSCL(dx,rho,u,P,E)
 ! avec MUSCL
 ! ======================================================================================= 
 ! Parametres globaux 
-use Module_parametres, only : N, maxiter, tol
+use Module_parametres, only : N, maxiter, tol_rho, tol_u, tol_e
 
 ! Déclarations
   implicit none
-  double precision, intent(in) 	 			   	:: dx								    ! Double from the main
+  double precision, intent(in) 	 			   	:: dx								    	! Double from the main
   double precision, dimension(:,:),allocatable 	:: w,w_s,w_L,w_R,St							! Vecteur w au temps t
-  double precision, dimension(:,:),allocatable  :: w_mid								! Vecteur w au temps t{n+1/2}
-  double precision, dimension(:,:),allocatable  :: w_new								! Vecteur w au temps t{n+1}
-  double precision								:: rho_s, u_s, E_s,dt,t,res				! Double 	
-  integer 										:: iter									! Integer for loop
-  double precision, dimension(:),allocatable	:: x_i,An,Anf	    				    ! Maillage et Geometrie de la tuyere
-  double precision, dimension(:,:),allocatable 	:: F_L,F_R								! Vecteur Flux
-  double precision, dimension(:,:),allocatable 	:: F_num								! Vecteur Flux numériques 
-  double precision, dimension(:),allocatable 	:: Ma,s,Temp							! Mach number, entropy and Temperature
-  double precision, dimension(:),intent(inout) 	:: rho, u, P, E		    				! Caractéristiques physique du fluide
+  double precision, dimension(:,:),allocatable  :: w_mid									! Vecteur w au temps t{n+1/2}
+  double precision, dimension(:,:),allocatable  :: w_new									! Vecteur w au temps t{n+1}
+  double precision								:: rho_s, u_s, E_s,dt,t,res_rho,res_u,res_e	! Double 	
+  integer 										:: iter										! Integer for loop
+  double precision, dimension(:),allocatable	:: x_i,An,Anf	    				    	! Maillage et Geometrie de la tuyere
+  double precision, dimension(:,:),allocatable 	:: F_L,F_R									! Vecteur Flux
+  double precision, dimension(:,:),allocatable 	:: F_num									! Vecteur Flux numériques 
+  double precision, dimension(:),allocatable 	:: Ma,s,Temp								! Mach number, entropy and Temperature
+  double precision, dimension(:),intent(inout) 	:: rho, u, P, E		    					! Caractéristiques physique du fluide
   
   ! Fin des declarations
  !=======================================================================================
@@ -46,7 +46,7 @@ use Module_parametres, only : N, maxiter, tol
 	allocate(Ma(N), s(N), Temp(N))		     ! Variables thermophysiques Mach number, entropy, temperature
 	
 	t = 0.0D0   ! temps de la simulation 
-	res = 1.0d9 ! Residus
+	res_rho = 1.0d9; res_u = 1.0d9; res_e = 1.0d9 ! Residus
 	
 	! Mesh creation
 	call Mesh(dx,x_i)
@@ -88,26 +88,34 @@ use Module_parametres, only : N, maxiter, tol
 		call Boundary_conditions(w_s,An,w_new)
 		
 		! Calcul des residus
-		call Compute_residus(An,w,w_new,res)
+		call Compute_residus(An,w,w_new,res_rho,res_u,res_e)
 		
 		! Test de Convergence
-		if (res <= tol) then
-			print*, "Convergence atteinte en ",iter," iterations !"
-			print*,"Residus = ",res
+		if (res_rho <= tol_rho .and. res_u <= tol_u .and. res_e <= tol_e) then
+			write(*, '(A,I0,A)') "Convergence atteinte en ", iter, " iterations !"
+			write(*, '(A,1PE10.4,A,1PE10.4,A,1PE10.4)') &
+				"Residus: rho = ", res_rho, " | u = ", res_u, " | E = ", res_e
 			exit
 		end if
 		
 		! Affichage toutes les 100 itérations pour monitorer
-		if (mod(iter, 100) == 0) print*, "| It:", iter, " Res=", res, '| dt = ',dt
+		if (mod(iter, 100) == 0) then
+			write(*, '(A,I6,A,1PE10.4,A,1PE10.4,A,1PE10.4,A,1PE10.4)') &
+				"| It:", iter, &
+				" | Res_rho=", res_rho, &
+				" | Res_u=",   res_u, &
+				" | Res_E=",   res_e, &
+				" | dt=",      dt
+		end if
 		
 		! Update du vecteur conservatif
 		w = w_new
 		
 	end do
 	
-	if (res > tol) then
+	if (iter >= maxiter) then
 		print*, "ATTENTION : Pas de convergence apres ", maxiter, " iterations."
-		print*, "Residu final = ", res
+		write(*, '(A,1PE10.4,A,1PE10.4,A,1PE10.4)')"Residus: rho = ", res_rho, " | u = ", res_u, " | E = ", res_e
 	end if
 	
 	! Sauvegarde
@@ -723,7 +731,7 @@ END subroutine Source_term
 ! -----------------------------
 
 
-subroutine Compute_residus(An,w,w_new,res)
+subroutine Compute_residus(An,w,w_new,res_rho,res_u,res_e)
 ! ================================================
 ! Compute residus
 ! ================================================
@@ -731,29 +739,52 @@ subroutine Compute_residus(An,w,w_new,res)
 use Module_parametres, only : N
 ! Declarations
  implicit none
- double precision,dimension(-1:),intent(in)	     :: An		 	        ! Geometrie de la tuyere
- double precision, dimension(:,-1:),intent(in)   :: w 				    ! Composantes du vecteur w au temps t{n}
- double precision, dimension(:,-1:),intent(in)   :: w_new 				! Composantes du vecteur w au temps t{n}
- integer										 :: i					! Calcul de boucle
- double precision				                 :: rho_np1,rho_n  		! Variables locales
- double precision,intent(out)                    :: res  				! residu
+ double precision,dimension(-1:),intent(in)	     :: An		 	        	! Geometrie de la tuyere
+ double precision, dimension(:,-1:),intent(in)   :: w 				    	! Composantes du vecteur w au temps t{n}
+ double precision, dimension(:,-1:),intent(in)   :: w_new 					! Composantes du vecteur w au temps t{n}
+ double precision                                :: norm_rho,norm_u,norm_e  ! Normes
+ integer										 :: i						! Calcul de boucle
+ double precision				                 :: rho_np1,rho_n  			! Variables locales
+ double precision				                 :: u_np1,u_n  				! Variables locales
+ double precision				                 :: e_np1,e_n  				! Variables locales
+ double precision,intent(out)                    :: res_rho,res_u,res_e 	! Residus
 ! =========================================================================================================================
 ! Fin des declarations 
 
 ! Init
-res =  0.0d0 
+res_rho = 0.0d0 
+res_u   = 0.0d0 
+res_e   = 0.0d0 
+norm_rho = 0.0d0
+norm_u   = 0.0d0
+norm_e   = 0.0d0
 
-do i=1,N
-	! Get density at it n 
-    rho_n   = w(1,i) / An(i)
-	! Get density at it n+1
+do i = 1, N
+    ! --- Temps n ---
+    rho_n = w(1,i) / An(i)
+    u_n   = w(2,i) / max(An(i) * rho_n, 1.0d-12)
+    e_n   = w(3,i) / max(An(i) * rho_n, 1.0d-12)
+
+    ! --- Temps n+1 ---
     rho_np1 = w_new(1,i) / An(i)
-	! Compute residu
-	res = res + (rho_np1-rho_n)**2.0d0
-enddo
+    u_np1   = w_new(2,i) / max(An(i) * rho_np1, 1.0d-12)
+    e_np1   = w_new(3,i) / max(An(i) * rho_np1, 1.0d-12)
 
-! Norme L2
-res = dsqrt(res/dble(N))
+    ! --- Somme des carrés des écarts ---
+    res_rho = res_rho + (rho_np1 - rho_n)**2
+    res_u   = res_u   + (u_np1   - u_n)**2
+    res_e   = res_e   + (e_np1   - e_n)**2
+
+    ! --- Somme des carrés pour normalisation ---
+    norm_rho = norm_rho + rho_np1**2
+    norm_u   = norm_u   + u_np1**2
+    norm_e   = norm_e   + e_np1**2
+end do
+
+! --- Norme L2 Relative (Sans dimension) ---
+res_rho = dsqrt(res_rho / max(norm_rho, 1.0d-12))
+res_u   = dsqrt(res_u   / max(norm_u,   1.0d-12))
+res_e   = dsqrt(res_e   / max(norm_e,   1.0d-12))
 
 END subroutine Compute_residus
 

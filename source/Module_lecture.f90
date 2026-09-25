@@ -74,7 +74,9 @@ read(nfich,*) ! Saute Description
 read(nfich,*) maxiter
 read(nfich,*) ! Saute la ligne vide
 read(nfich,*) ! Saute Description
-read(nfich,*) tol
+read(nfich,*) tol_rho
+read(nfich,*) tol_u
+read(nfich,*) tol_e
 read(nfich,*) ! Saute la ligne vide
 read(nfich,*) ! Saute Description
 read(nfich,*) i_geo

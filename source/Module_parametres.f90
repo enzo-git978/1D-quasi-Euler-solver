@@ -35,7 +35,9 @@ implicit none
 	! --- Parametres numeriques ---
 	integer	         :: N       ! Nombres de mailles
 	integer          :: maxiter ! Nb max d iterations
-	double precision :: tol  	! Precision des residus
+	double precision :: tol_rho ! Precision des residus de rho
+	double precision :: tol_u 	! Precision des residus de u
+	double precision :: tol_e   ! Precision des residus de e
 	double precision :: L   	! Longueur du domaine
     double precision :: CFL 	! Condition CFL
 	

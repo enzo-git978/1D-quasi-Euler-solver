@@ -49,8 +49,10 @@ MENU DU CODE EULER Quasi_1D POUR TUYERES
 ! Maxiter : Nombre d'iterations max
 50000
 
-! Tol : Precision des résidus
+! Tol : Precision des résidus pour chaque variable primaire (tol_rho, tol_u, tol_e)
 1.0d-7
+1.0d-5
+1.0d-5
 
 ! Configuration de la Tuyere, 1 : Divergent, 2 : Tuyere de Laval, 3 : Tuyere CV/DV, 4 : Soufflerie double col de 3m (2eme col ferme), 5 : idem col ouvert, 6 : parabolique 
 2
@@ -60,7 +62,7 @@ MENU DU CODE EULER Quasi_1D POUR TUYERES
 
 --BOUNDARY CONDITIONS------------------------------------------------------------------------------
 ! Inlet BC   1 : Subsonic inlet, 2 : Supersonic inlet	
-1	
+2	
 
 ! Outlet BC   1 : Subsonic outlet, 2 : Supersonic outlet	
 1
