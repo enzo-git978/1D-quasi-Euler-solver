@@ -161,7 +161,7 @@ subroutine create_gnuplot_script(Tf,Save_choice)
 
   ! --- 5. Debit ---
   write(iunit, '(A)') "set xlabel 'x (m)'"
-  write(iunit, '(A)') "set ylabel 'rho_u_A'"
+  write(iunit, '(A)') "set ylabel 'rho u A'"
   write(iunit, '(A)') "set title 'Debit [kg/s]'"
   write(iunit, '(A)') "set grid"
   write(iunit, '(A)') "plot filename_final using 1:7 with lines lw 2 lc rgb 'purple' title sprintf('t=%.3fs', t_final)"

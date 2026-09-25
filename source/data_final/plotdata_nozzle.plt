@@ -40,7 +40,7 @@ set grid
 plot filename_final using 1:6 with lines lw 2 lc rgb 'orange' title sprintf('t=%.3fs', t_final)
  
 set xlabel 'x (m)'
-set ylabel 'rho_u_A'
+set ylabel 'rho u A'
 set title 'Debit [kg/s]'
 set grid
 plot filename_final using 1:7 with lines lw 2 lc rgb 'purple' title sprintf('t=%.3fs', t_final)

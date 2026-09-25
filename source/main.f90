@@ -1,9 +1,9 @@
 program main
 ! ========================================================================================
 ! Programme de resolution du systeme d'Euler constitu� des lois de conservation : 
-! conservation de la masse, de la quantit� de mvt et de l'energie
+! conservation de la masse, de la quantite de mvt et de l'energie
 ! en 1D instationnaire : d_t w + d_x F(w) = 0
-! ou w = {rho,rho u, rho E} et F = {rho u, rho u�+P, (rho E+P) u}
+! ou w = {rho,rho u, rho E} et F = {rho u, rho u+P, (rho E+P) u}
 ! Condition initiale : w(x,0) = {w_R si x< x_d w_L sinon}
 ! Discr�tisation spatiale choisit : n pts; x_i = (i-0.5)*h; i=1,n (cell-centered mesh)
 !
@@ -18,8 +18,8 @@ program main
 !              |-         +|-         +|-         +|
 !            i-3/2       i-1/2       i+1/2       i+3/2
 
-! Avec Reconstruction MUSCL : les variables d �tats ne sont plus cstes mais 
-! �voluent de fa�on lin�aires dans chaque mailles
+! Avec Reconstruction MUSCL : les variables d etats ne sont plus cstes mais 
+! evoluent de facon lineaires dans chaque mailles
 ! ========================================================================================
 
 

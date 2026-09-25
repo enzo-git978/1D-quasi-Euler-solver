@@ -128,7 +128,6 @@ end subroutine read_parameters
 
 ! -----------------------------
 
-
 subroutine display_parameters()
 
 !=====================================================================
@@ -136,7 +135,7 @@ subroutine display_parameters()
 !=====================================================================
 ! Parametres globaux
 use Module_parametres
- ! =========================================================================================================================
+! =========================================================================================================================
 ! Fin des declarations 
   
 ! Main
@@ -146,7 +145,9 @@ write(*, '(A25, F8.3)')  'gamma = ', gamma
 write(*, '(A25, F8.3)')  'Cp = ', Cp
 write(*, '(A25, F8.1, A8)') 'Stagnation pressure = ', Pt0/1.0d5, ' bar'
 write(*, '(A25, F8.1, A8)') 'Stagnation temperature = ', Tt0, ' Kelvin'
-write(*, '(A25, F8.1, A8)') 'Exit pressure = ', Pext/1.0d5, ' bar'
+if (o_BC == 1) then
+	write(*, '(A25, F8.1, A8)') 'Exit pressure = ', Pext/1.0d5, ' bar'
+endif
 if (Cf /= 0.0d0) then 
 	write(*, '(A25)') 'Friction model activated ! '
 	write(*, '(A25, F8.2, A8)') 'Cf = ', Cf, ' '
@@ -162,8 +163,7 @@ write(*, '(A25, I10)')  'Nombre de points N = ', N
 write(*, '(A25, F8.3)')  'Longueur de la tuyere = ', L
 write(*, '(A25, F8.3)')  'cfl = ', cfl
 write(*, '(A25, I10)')  'maxiter = ', maxiter
-write(*, *)  'tol = ', tol
-
+write(*, *) 'Tol rho : ', tol_rho,' Tol u : ', tol_u, ' Tol E : ',tol_e
 
 write(*,*)'*****************************************'
 write(*,*)'-- Geometrie de la Tuyere -- : '
@@ -171,7 +171,7 @@ select case(i_geo)
 	case(1)
 	    write(*,*) 'Divergent'
 	case(2)
-		write(*,*) ' Tuyere de Laval'
+		write(*,*) 'Tuyere de Laval'
 	case(3)
 		write(*,*) 'Tuyere CV/DV'
 	case(4)
@@ -210,7 +210,7 @@ select case(i_sc)
 	case(5)
 		write(*,*) 'HLLC-ANRS'
 	case(6)
-		write(*,*) 'HLLC robuste'
+		write(*,*) 'HLLC'
 end select
 
 
@@ -240,19 +240,21 @@ select case(i_ord)
 		end select
 end select
 
-select case(i_cor)
-	case(0)
-	    write(*,*) 'Sans correction entropique'
-		write(*, *)
-	case(1)
-		write(*,*) 'Correction entropique'
-		write(*,'(A, F8.3)') 'Coefficient delta_star=',delta_star
-		write(*, *)
-	case(2)
-		write(*,*) 'Correction entropique complete'
-		write(*, '(A, F8.3)') 'Coefficient delta_star=',delta_star
-		write(*, *)
-end select
+if (i_sc == 1) then 
+	select case(i_cor)
+		case(0)
+			write(*,*) 'Sans correction entropique'
+			write(*, *)
+		case(1)
+			write(*,*) 'Correction entropique'
+			write(*,'(A, F8.3)') 'Coefficient delta_star=',delta_star
+			write(*, *)
+		case(2)
+			write(*,*) 'Correction entropique complete'
+			write(*, '(A, F8.3)') 'Coefficient delta_star=',delta_star
+			write(*, *)
+	end select
+endif
 
 
 end subroutine display_parameters

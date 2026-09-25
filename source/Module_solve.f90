@@ -63,9 +63,8 @@ use Module_parametres, only : N, maxiter, tol_rho, tol_u, tol_e
 	! Boucle temporelle
 	do iter=1,maxiter
 		call Compute_time_step(dx,rho,u,E,P,An,w,dt) ! Calcul du pas de temps avec CFL
-		t = t + dt
-		!print*,'t = ', t, ' 	| dt =', dt
-		
+		t = t + dt ! increment du temps 
+
 		! Interpolation (ordre 1 ou reconstruction MUSCL ordre 2 ou plus)
 		call Interp(rho,u,P,E,An,w,w_L,w_R)
 		
